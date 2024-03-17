@@ -1,0 +1,29 @@
+name: Build container
+on:
+  push:
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: get-tl-mirror-status
+          tags: ${{ github.ref_name }} ${{ github.sha }}
+          containerfiles: ./Containerfile
+      - name: Push image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ghcr.io/zauguin
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
