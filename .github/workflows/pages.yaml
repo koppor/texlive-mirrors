@@ -31,7 +31,7 @@ jobs:
           podman run ghcr.io/zauguin/get-tl-mirror-status:get-tl-mirror-status > mirrors.json
       - name: Generate older 'us' file
         run: |
-          jq -r 'map_values(map_values(to_entries | map(.value.url = .key | .value) | [.[] | select(.status == "Alive")] | group_by(.texlive_version) | INDEX(.[0].texlive_version) | map_values(group_by(.revision) | INDEX(.[0].revision) | map_values(map(.url))) | to_entries | max_by(.key | tonumber).value | to_entries | max_by(.key | tonumber).value)) | .["North America"].USA | .[]' < mirrors.json > us
+          jq -r 'map_values(map_values(to_entries | map(.value.url = .key | .value) | [.[] | select(.status == "Alive")] | if length == 0 then [] else group_by(.texlive_version) | INDEX(.[0].texlive_version) | map_values(group_by(.revision) | INDEX(.[0].revision) | map_values(map(.url))) | to_entries | max_by(.key | tonumber).value | to_entries | max_by(.key | tonumber).value end)) | .["North America"].USA | .[]' < mirrors.json > us
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
